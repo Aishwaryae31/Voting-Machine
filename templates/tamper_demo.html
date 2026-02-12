@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tamper Detection Demo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .control-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .control-panel h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .control-panel p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .control-panel label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .control-panel select,
+        .control-panel input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .control-panel select:focus,
+        .control-panel input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .step-card {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .step-card:hover {
+            transform: translateX(5px);
+        }
+        
+        .step-card.error {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        
+        .step-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .step-card pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .hack-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+        }
+        
+        .hack-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .hack-button:active {
+            transform: translateY(0);
+        }
+        
+        .tamper-animation {
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        
+        .alert-box {
+            background: #ffebee;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #f44336;
+            margin: 20px 0;
+        }
+        
+        .alert-box h2 {
+            color: #c62828;
+            margin-bottom: 10px;
+        }
+        
+        .alert-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .back-button {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        
+        .back-button:hover {
+            background: #45a049;
+        }
+        
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="header">
+            <h1>🛡️ Blockchain Tamper Detection Demo</h1>
+            <p>See how blockchain technology prevents vote manipulation!</p>
+            <a href="/results" class="back-button">← Back to Results</a>
+        </div>
+
+        <div class="control-panel">
+            <h2>⚠️ Try to Hack the Blockchain</h2>
+            <p>Select a block and try to change the vote data. Watch how the blockchain detects and prevents tampering!</p>
+            
+            <label>Select Block to Tamper:</label>
+            <select id="blockSelect">
+                <option value="">Loading blocks...</option>
+            </select>
+
+            <label>Enter Fake Candidate Name:</label>
+            <input type="text" id="candidateName" placeholder="e.g., HACKER">
+
+            <label>Enter Fake Vote Count:</label>
+            <input type="number" id="voteCount" placeholder="e.g., 9999" min="1">
+
+            <button class="hack-button" onclick="attemptHack()">
+                ⚠️ ATTEMPT TAMPERING
+            </button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Processing hack attempt... 🔄
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Load available blocks
+        async function loadBlocks() {
+            try {
+                const response = await fetch('/api/results');
+                const data = await response.json();
+                const select = document.getElementById('blockSelect');
+                
+                // Clear loading option
+                select.innerHTML = '';
+                
+                if (data.blockchain && data.blockchain.length > 0) {
+                    data.blockchain.forEach((block, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = `Block #${block.index} - ${block.timestamp}`;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option value="">No blocks available</option>';
+                }
+            } catch (error) {
+                console.error('Error loading blocks:', error);
+                document.getElementById('blockSelect').innerHTML = '<option value="">Error loading blocks</option>';
+            }
+        }
+
+        async function attemptHack() {
+            const blockIndex = parseInt(document.getElementById('blockSelect').value);
+            const candidateName = document.getElementById('candidateName').value || 'HACKER';
+            const voteCount = parseInt(document.getElementById('voteCount').value) || 9999;
+
+            // Validation
+            if (isNaN(blockIndex)) {
+                alert('Please select a block to tamper with!');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').innerHTML = '';
+
+            try {
+                const response = await fetch('/api/tamper/demo', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        block_index: blockIndex,
+                        new_vote: {candidate: candidateName, votes: voteCount}
+                    })
+                });
+
+                const result = await response.json();
+                document.getElementById('loading').style.display = 'none';
+                displayResults(result);
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                console.error('Error:', error);
+                document.getElementById('results').innerHTML = `
+                    <div class="alert-box">
+                        <h2>❌ Error</h2>
+                        <p>Failed to execute tamper attempt. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayResults(result) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.className = 'tamper-animation';
+            
+            let html = `
+                <div class="alert-box">
+                    <h2>🛡️ ${result.message}</h2>
+                    <p><strong>${result.conclusion}</strong></p>
+                </div>
+            `;
+
+            if (result.steps && result.steps.length > 0) {
+                result.steps.forEach(step => {
+                    const isError = step.action.includes('failed') || 
+                                  step.action.includes('changed') || 
+                                  step.action.includes('mismatch') ||
+                                  (step.data && step.data.match === false);
+                    
+                    html += `
+                        <div class="step-card ${isError ? 'error' : ''}">
+                            <h3>${isError ? '❌' : '✅'} Step ${step.step}: ${step.action}</h3>
+                            <pre>${JSON.stringify(step.data, null, 2)}</pre>
+                        </div>
+                    `;
+                });
+            }
+
+            html += `
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="hack-button" onclick="attemptHack()">
+                        🔄 Try Another Hack Attempt
+                    </button>
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+            
+            // Scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Load blocks on page load
+        loadBlocks();
+    </script>
+</body>
+</html>

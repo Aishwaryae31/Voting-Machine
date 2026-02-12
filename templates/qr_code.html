@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code - Blockchain Voting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .qr-section {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        #qrCodeImage {
+            max-width: 300px;
+            margin: 20px auto;
+            display: block;
+            border: 5px solid white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .voter-info {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .voter-info p {
+            margin: 10px 0;
+            font-size: 1.1em;
+            color: #333;
+        }
+        
+        .voter-info strong {
+            color: #1976d2;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-back:hover {
+            background: #5a6268;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #f44336;
+            margin: 20px 0;
+        }
+        
+        .instructions {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        
+        .instructions h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            margin-left: 20px;
+            color: #856404;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Your Voter QR Code</h1>
+        <p class="subtitle">Quick and secure voting access</p>
+        
+        <div id="content">
+            <div class="loading">
+                <p>⏳ Generating your QR code...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function generateQR() {
+            try {
+                const response = await fetch('/api/qr/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to generate QR code');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayQRCode(data);
+                } else {
+                    showError(data.error || 'Failed to generate QR code');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('You must be logged in to generate a QR code. Please login first.');
+            }
+        }
+        
+        function displayQRCode(data) {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="qr-section">
+                    <img id="qrCodeImage" src="${data.qr_code}" alt="Voter QR Code">
+                </div>
+                
+                <div class="voter-info">
+                    <p><strong>Voter ID:</strong> ${data.voter_id}</p>
+                    <p><strong>Name:</strong> ${data.name}</p>
+                </div>
+                
+                <div class="instructions">
+                    <h3>📱 How to use your QR code:</h3>
+                    <ul>
+                        <li>Save or print this QR code</li>
+                        <li>Bring it to the polling station</li>
+                        <li>Scan it for instant authentication</li>
+                        <li>Vote securely and quickly!</li>
+                    </ul>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="downloadQR()">
+                        📥 Download QR Code
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.print()">
+                        🖨️ Print QR Code
+                    </button>
+                    <a href="/" class="btn btn-back">
+                        ← Back to Home
+                    </a>
+                </div>
+            `;
+        }
+        
+        function downloadQR() {
+            const img = document.getElementById('qrCodeImage');
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = 'voter-qr-code.png';
+            link.click();
+        }
+        
+        function showError(message) {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="error">
+                    <h3>❌ Error</h3>
+                    <p>${message}</p>
+                </div>
+                <div class="button-group">
+                    <a href="/vote" class="btn btn-primary">
+                        Login to Generate QR Code
+                    </a>
+                    <a href="/" class="btn btn-back">
+                        ← Back to Home
+                    </a>
+                </div>
+            `;
+        }
+        
+        // Generate QR on page load
+        generateQR();
+    </script>
+</body>
+</html>

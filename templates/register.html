@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Blockchain Voting</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">🗳️ BlockVote</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/register">Register</a>
+                <a href="/vote">Vote</a>
+                <a href="/results">Results</a>
+                <a href="/admin">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="form-section">
+        <div class="container">
+            <div class="form-container">
+                <div class="form-header">
+                    <div class="form-icon">🔐</div>
+                    <h2>Voter Registration</h2>
+                    <p>Create your secure voting account</p>
+                </div>
+
+                <form method="POST" action="/register" id="registerForm">
+                    <div class="form-group">
+                        <label for="name">👤 Full Name</label>
+                        <input type="text" id="name" name="name" required placeholder="Enter your full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">📧 Email Address</label>
+                        <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="voter_id">🆔 Voter ID</label>
+                        <input type="text" id="voter_id" name="voter_id" required placeholder="Enter unique voter ID">
+                        <small>Create a unique ID (e.g., VOTER001)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">🔑 Password</label>
+                        <input type="password" id="password" name="password" required placeholder="Create a strong password">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Register</button>
+                </form>
+
+                <div class="form-footer">
+                    <p>Already registered? <a href="/vote">Login to vote</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Blockchain Voting System. Built for transparency and trust.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

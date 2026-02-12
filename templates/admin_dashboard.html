@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Blockchain Voting</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">🗳️ BlockVote Admin</div>
+            <div class="nav-links">
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/results">Results</a>
+                <a href="/admin/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="admin-section">
+        <div class="container">
+            <h2 class="section-title" style="color: white;">Admin Dashboard</h2>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-number">{{ total_voters }}</div>
+                    <div class="stat-label">Registered Voters</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-number">{{ voted_count }}</div>
+                    <div class="stat-label">Votes Cast</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-number">{% if total_voters > 0 %}{{ (voted_count / total_voters * 100)|round(1) }}{% else %}0{% endif %}%</div>
+                    <div class="stat-label">Turnout Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔗</div>
+                    <div class="stat-number">{{ chain_length }}</div>
+                    <div class="stat-label">Blockchain Blocks</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Vote Distribution</h3>
+                <canvas id="votesChart"></canvas>
+            </div>
+
+            <div class="admin-panel">
+                <h3>Manage Candidates</h3>
+                
+                <form method="POST" action="/admin/add_candidate" class="add-candidate-form">
+                    <input type="text" name="name" placeholder="Candidate Name" required>
+                    <input type="text" name="party" placeholder="Party Name" required>
+                    <button type="submit" class="btn btn-primary">Add Candidate</button>
+                </form>
+
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Party</th>
+                            <th>Votes</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for candidate in candidates %}
+                        <tr>
+                            <td>{{ candidate[0] }}</td>
+                            <td>{{ candidate[1] }}</td>
+                            <td>{{ candidate[2] }}</td>
+                            <td>{{ candidate[3] }}</td>
+                            <td>
+                                <a href="/admin/delete_candidate/{{ candidate[0] }}" 
+                                   onclick="return confirm('Delete this candidate?')" 
+                                   class="btn-delete">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-panel">
+                <h3>Registered Voters</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Voter ID</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for voter in voters %}
+                        <tr>
+                            <td>{{ voter[1] }}</td>
+                            <td>{{ voter[2] }}</td>
+                            <td>{{ voter[3] }}</td>
+                            <td>
+                                {% if voter[5] == 1 %}
+                                <span class="status-badge success">✅ Voted</span>
+                                {% else %}
+                                <span class="status-badge pending">⏳ Not Voted</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-actions">
+                <a href="/admin/export_results" class="btn btn-primary">📥 Export Results (CSV)</a>
+                <a href="/admin/reset_election" 
+                   onclick="return confirm('⚠️ This will reset ALL votes and blockchain! Continue?')" 
+                   class="btn btn-secondary">🔄 Reset Election</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Blockchain Voting System. Built for transparency and trust.</p>
+        </div>
+    </footer>
+
+    <script>
+        const ctx = document.getElementById('votesChart').getContext('2d');
+        const votesChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    {% for candidate in candidates %}
+                    '{{ candidate[1] }}',
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Votes',
+                    data: [
+                        {% for candidate in candidates %}
+                        {{ candidate[3] }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: [
+                        'rgba(79, 70, 229, 0.8)',
+                        'rgba(6, 182, 212, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(251, 146, 60, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(79, 70, 229, 1)',
+                        'rgba(6, 182, 212, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(251, 146, 60, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

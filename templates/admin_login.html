@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Blockchain Voting</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">🗳️ BlockVote</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="form-section">
+        <div class="container">
+            <div class="form-container">
+                <div class="form-header">
+                    <div class="form-icon">🔐</div>
+                    <h2>Admin Login</h2>
+                    <p>Enter admin password to access dashboard</p>
+                </div>
+
+                <form method="POST" action="/admin/login">
+                    <div class="form-group">
+                        <label for="password">🔑 Admin Password</label>
+                        <input type="password" id="password" name="password" required placeholder="Enter admin password">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Login as Admin</button>
+                </form>
+
+                <div class="form-footer">
+                    <p><a href="/">Back to Home</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Blockchain Voting System. Built for transparency and trust.</p>
+        </div>
+    </footer>
+</body>
+</html>
