@@ -273,7 +273,7 @@ def api_results():
     })
 
 # ==================== ADMIN ROUTES ====================
-ADMIN_PASSWORD = "admin123"
+ADMIN_PASSWORD = "add your password"
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
