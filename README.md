@@ -56,7 +56,7 @@ Modular routing separation
 
 ⚙️ Installation & Setup
 1. Clone the repository
-git clone https://github.com/yourusername/voting-machine.git
+git clone https://github.com/aishwaryae31/voting-machine.git
 2. Navigate to project folder
 cd voting-machine
 3. Install dependencies
